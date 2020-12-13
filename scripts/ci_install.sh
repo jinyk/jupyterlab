@@ -23,7 +23,7 @@ pip install jupyter_packaging
 pip install -e ".[test]" || pip install -v -e ".[test]"
 jlpm versions
 jlpm config current
-jupyter server extension enable jupyterlab 
+jupyter server extension enable jupyterlab
 jupyter server extension list 1>serverextensions 2>&1
 cat serverextensions
 cat serverextensions | grep -i "jupyterlab.*enabled"
@@ -42,7 +42,7 @@ fi
 
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
-    python setup.py bdist_wheel
+    python setup.py bdist_wheel sdist
 
     # Remove NodeJS, twice to take care of system and locally installed node versions.
     sudo rm -rf $(which node)
@@ -52,5 +52,5 @@ fi
 
 # The debugger tests require a kernel that supports debugging
 if [[ $GROUP == js-debugger ]]; then
-    pip install -U xeus-python>=0.8
+    pip install xeus-python">=0.9.0,<0.10.0"
 fi

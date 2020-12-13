@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/json-extension",
-  "version": "3.0.0-rc.1",
+  "version": "3.0.0-rc.13",
   "description": "JupyterLab - JSON Renderer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,21 +34,21 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-rc.1",
-    "@jupyterlab/rendermime-interfaces": "^3.0.0-rc.1",
-    "@jupyterlab/translation": "^3.0.0-rc.1",
-    "@jupyterlab/ui-components": "^3.0.0-rc.1",
+    "@jupyterlab/apputils": "^3.0.0-rc.13",
+    "@jupyterlab/rendermime-interfaces": "^3.0.0-rc.13",
+    "@jupyterlab/translation": "^3.0.0-rc.13",
+    "@jupyterlab/ui-components": "^3.0.0-rc.13",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",
-    "@lumino/widgets": "^1.14.0",
-    "react": "~16.13.1",
-    "react-dom": "~16.13.1",
+    "@lumino/widgets": "^1.16.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "react-highlighter": "^0.4.3",
     "react-json-tree": "^0.12.1"
   },
   "devDependencies": {
-    "@types/react": "~16.9.48",
-    "@types/react-dom": "~16.9.8",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
     "@types/react-highlighter": "^0.3.4",
     "@types/react-json-tree": "^0.6.11",
     "rimraf": "~3.0.0",
@@ -60,5 +60,6 @@
   },
   "jupyterlab": {
     "mimeExtension": true
-  }
+  },
+  "styleModule": "style/index.js"
 }

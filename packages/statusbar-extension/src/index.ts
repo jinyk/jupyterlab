@@ -26,6 +26,8 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
+import { IMainMenu } from '@jupyterlab/mainmenu';
+
 import {
   INotebookTracker,
   Notebook,
@@ -36,16 +38,17 @@ import {
   IStatusBar,
   KernelStatus,
   LineCol,
-  MemoryUsage,
   RunningSessions,
   StatusBar
 } from '@jupyterlab/statusbar';
 
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { ITranslator } from '@jupyterlab/translation';
+
+import { Switch } from '@jupyterlab/ui-components';
+
+import { CommandRegistry } from '@lumino/commands';
 
 import { Title, Widget } from '@lumino/widgets';
 
@@ -320,37 +323,6 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
   }
 };
 
-/**
- * A plugin providing memory usage statistics to the application.
- *
- * #### Notes
- * This plugin will not work unless the memory usage server extension
- * is installed.
- */
-export const memoryUsageItem: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/statusbar-extension:memory-usage-status',
-  autoStart: true,
-  requires: [IStatusBar, ITranslator],
-  activate: (
-    app: JupyterFrontEnd,
-    statusBar: IStatusBar,
-    translator: ITranslator
-  ) => {
-    const item = new MemoryUsage(translator);
-
-    statusBar.registerStatusItem(
-      '@jupyterlab/statusbar-extension:memory-usage-status',
-      {
-        item,
-        align: 'left',
-        rank: 2,
-        isActive: () => item.model!.metricsAvailable,
-        activeStateChanged: item.model!.stateChanged
-      }
-    );
-  }
-};
-
 /*
  * A plugin providing running terminals and sessions information
  * to the status bar.
@@ -381,12 +353,68 @@ export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
   }
 };
 
+/**
+ * The single-document mode switch in the top area.
+ */
+const modeSwitch: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/statusbar-extension:mode-switch',
+  requires: [ILabShell, ITranslator, IStatusBar],
+  activate: (
+    app: JupyterFrontEnd,
+    shell: ILabShell,
+    translator: ITranslator,
+    statusBar: IStatusBar
+  ) => {
+    const trans = translator.load('jupyterlab');
+    const modeSwitch = new Switch();
+    modeSwitch.id = 'jp-single-document-mode';
+
+    modeSwitch.valueChanged.connect((_, args) => {
+      shell.mode = args.newValue ? 'single-document' : 'multiple-document';
+    });
+    shell.modeChanged.connect((_, mode) => {
+      modeSwitch.value = mode === 'single-document';
+    });
+    modeSwitch.value = shell.mode === 'single-document';
+
+    // Show the current file browser shortcut in its title.
+    const updateModeSwitchTitle = () => {
+      const binding = app.commands.keyBindings.find(
+        b => b.command === 'application:toggle-mode'
+      );
+      if (binding) {
+        const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+        modeSwitch.caption = trans.__('Single-Document Mode (%1)', ks);
+      } else {
+        modeSwitch.caption = trans.__('Single-Document Mode');
+      }
+    };
+    updateModeSwitchTitle();
+    app.commands.keyBindingChanged.connect(() => {
+      updateModeSwitchTitle();
+    });
+
+    modeSwitch.label = trans.__('Mode');
+
+    statusBar.registerStatusItem(
+      '@jupyterlab/statusbar-extension:mode-switch',
+      {
+        item: modeSwitch,
+        align: 'left',
+        isActive: () => true,
+        rank: -1
+      }
+    );
+  },
+  autoStart: true
+};
+
 const plugins: JupyterFrontEndPlugin<any>[] = [
   statusBar,
   lineColItem,
   kernelStatus,
   runningSessionsItem,
-  memoryUsageItem
+  modeSwitch
 ];
 
 export default plugins;

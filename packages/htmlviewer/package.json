@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/htmlviewer",
-  "version": "3.0.0-rc.1",
+  "version": "3.0.0-rc.13",
   "description": "A viewer for HTML documents.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -23,7 +23,8 @@
   },
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -32,14 +33,14 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-rc.1",
-    "@jupyterlab/coreutils": "^5.0.0-rc.1",
-    "@jupyterlab/docregistry": "^3.0.0-rc.1",
-    "@jupyterlab/translation": "^3.0.0-rc.1",
-    "@jupyterlab/ui-components": "^3.0.0-rc.1",
+    "@jupyterlab/apputils": "^3.0.0-rc.13",
+    "@jupyterlab/coreutils": "^5.0.0-rc.13",
+    "@jupyterlab/docregistry": "^3.0.0-rc.13",
+    "@jupyterlab/translation": "^3.0.0-rc.13",
+    "@jupyterlab/ui-components": "^3.0.0-rc.13",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/signaling": "^1.4.3",
-    "react": "~16.13.1"
+    "react": "^17.0.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
@@ -47,5 +48,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "styleModule": "style/index.js"
 }

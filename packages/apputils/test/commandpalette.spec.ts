@@ -1,6 +1,4 @@
 // Copyright (c) Jupyter Development Team.
-
-import 'jest';
 // Distributed under the terms of the Modified BSD License.
 
 // import { expect } from 'chai';
@@ -77,11 +75,11 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#blur()', () => {
-      it('should hide and reset when blurred', () => {
+    describe('#focus()', () => {
+      it('should hide and reset when focus is shifted', () => {
         MessageLoop.sendMessage(modalPalette, Widget.Msg.ActivateRequest);
         palette.inputNode.value = 'Search string...';
-        simulate(modalPalette.node, 'blur');
+        simulate(document.body, 'focus');
         expect(modalPalette.isVisible).toBe(false);
         expect(palette.inputNode.value).toEqual('');
       });

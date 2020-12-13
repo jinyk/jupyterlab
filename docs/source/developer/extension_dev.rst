@@ -1,7 +1,8 @@
 .. _developer_extensions:
 
 Extension Developer Guide
--------------------------
+=========================
+
 JupyterLab can be extended in four ways via:
 
 -  **application plugins (top level):** Application plugins extend the
@@ -24,8 +25,13 @@ Starting in JupyterLab 3.0, extensions are distributed as ``pip`` or
 ``conda`` packages that contain federated JavaScript bundles.  You can write extensions in JavaScript or any language that compiles to JavaScript. We recommend writing extensions in `TypeScript <https://www.typescriptlang.org/>`_, which is used for the JupyterLab core extensions and many popular community extensions.  You use our build tool to generate the bundles that are shipped with the package, typically through a cookiecutter.
 
 
+We encourage extension authors to add the `jupyterlab-extension GitHub topic
+<https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
+to any GitHub extension repository.
+
+
 Goals of the Federated Extension System
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------
 - Users should be able to install and use extensions without requiring ``node`` or a build step
 - Extension authors should be able to easily build and distribute extensions
 - The existing capabilities of built-in extensions should still work
@@ -34,7 +40,7 @@ Goals of the Federated Extension System
 - Extensions should be discoverable
 
 Implementation
-~~~~~~~~~~~~~~
+--------------
 - We provide a ``jupyter labextension build`` script that is used to build federated bundles
    - The command produces a set of static assets that are shipped along with a package (notionally on ``pip``/``conda``)
    - It is a Python cli so that it can use the dependency metadata from the active JupyterLab
@@ -53,29 +59,68 @@ Implementation
 - We update the ``extension-manager`` to target metadata on ``pypi``/``conda`` and consume those packages.
 
 Tools
-~~~~~
+-----
 - ``jupyter labexension build`` python command line tool
 - ``jupyter labextension develop`` python command line tool
 - ``python -m jupyterlab.upgrade_extension`` python command line tool
 - ``cookiecutter`` for extension authors
 
 Workflow for extension authors
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------
 - Use the ``cookiecutter`` to create the extension
 - Run ``jupyter labextension develop`` to build and symlink the files
-- Run ``jupyter labextension watch`` to start watching
+- Run ``jlpm run watch`` to start watching
 - Run ``jupyter lab``
 - Make changes to source
 - Refresh the application page
 - When finished, publish the package to ``pypi``/``conda``
 
 
+Custom webpack config for federated extensions
+----------------------------------------------
+
+.. warning::
+   This feature is *experimental*, as it makes it possible to override the base config used by the
+   JupyterLab Federated Extension System.
+
+   It also exposes the internals of the federated extension build system (namely ``webpack``) to extension authors, which was until now
+   kept as an implementation detail.
+
+The JupyterLab Federated Extension System uses ``webpack`` to build federated extensions, relying on the
+`Module Federation System <https://webpack.js.org/concepts/module-federation/>`_ added in webpack 5.
+
+To specify a custom webpack config to the federated extension build system, extension authors can add the ``webpackConfig`` subkey to the
+``package.json`` of their extension::
+
+    "jupyterlab": {
+      "webpackConfig": "webpack.config.js"
+    }
+
+The webpack config file can be placed in a different location with a custom name::
+
+    "jupyterlab": {
+      "webpackConfig": "./config/test-config.js"
+    }
+
+Here is an example of a custom config that enables the async WebAssembly and top-level ``await`` experiments:
+
+.. code-block:: javascript
+
+    module.exports = {
+      experiments: {
+          topLevelAwait: true,
+          asyncWebAssembly: true,
+      }
+    };
+
+This custom config will be merged with the `default config <https://github.com/jupyterlab/jupyterlab/blob/master/builder/src/webpack.config.base.ts>`_
+when building the federated extension with ``jlpm run build``.
+
 .. note::
    These docs are under construction as we iterate and update tutorials and cookiecutters.
 
-
 Tutorials
-~~~~~~~~~
+---------
 
 We provide a set of guides to get started writing third-party extensions for JupyterLab:
 
@@ -85,7 +130,7 @@ We provide a set of guides to get started writing third-party extensions for Jup
 - :ref:`developer-extension-points`: A list of the most common JupyterLab extension points.
 
 Cookiecutters
-~~~~~~~~~~~~~
+-------------
 
 We provide several cookiecutters to create JupyterLab plugin extensions:
 
@@ -95,7 +140,7 @@ We provide several cookiecutters to create JupyterLab plugin extensions:
 - `theme-cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_: Create a new theme for JupyterLab
 
 API Documentation
-~~~~~~~~~~~~~~~~~
+-----------------
 
 If you are looking for lower level details on the JupyterLab and Lumino API:
 
@@ -103,7 +148,7 @@ If you are looking for lower level details on the JupyterLab and Lumino API:
 - `Lumino API Documentation <https://jupyterlab.github.io/lumino/>`_
 
 Plugins
-~~~~~~~
+-------
 
 A plugin adds a core functionality to the application:
 
@@ -149,7 +194,7 @@ Here is a dependency graph for the core JupyterLab components: |dependencies|
 
 
 Application Object
-~~~~~~~~~~~~~~~~~~
+------------------
 
 A Jupyter front-end application object is given to each plugin in its
 ``activate()`` function. The application object has:
@@ -162,7 +207,7 @@ A Jupyter front-end application object is given to each plugin in its
 -  ``shell`` - a generic Jupyter front-end shell instance, which holds the user interface for the application.
 
 Jupyter Front-End Shell
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 The Jupyter front-end
 `shell <https://jupyterlab.github.io/jupyterlab/interfaces/_application_src_index_.jupyterfrontend.ishell.html>`__
@@ -170,14 +215,15 @@ is used to add and interact with content in the application. The ``IShell``
 interface provides an ``add()`` method for adding widgets to the application.
 In JupyterLab, the application shell consists of:
 
--  A ``top`` area for things like top level menus and toolbars.
+-  A ``top`` area for things like top-level toolbars and information.
+-  A ``menu`` area for top-level menus, which is collapsed into the ``top`` area in multiple-document mode and put below it in single-document mode.
 -  ``left`` and ``right`` side bar areas for collapsible content.
 -  A ``main`` work area for user activity.
 -  A ``bottom`` area for things like status bars.
 -  A ``header`` area for custom elements.
 
 Lumino
-~~~~~~~~
+------
 
 The Lumino library is used as the underlying architecture of
 JupyterLab and provides many of the low level primitives and widget
@@ -193,7 +239,7 @@ interaction that enable listeners to react to changes in an observed
 object.
 
 Extension Authoring
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 An Extension is a valid `npm
 package <https://docs.npmjs.com/getting-started/what-is-npm>`__ that
@@ -386,7 +432,7 @@ Finally, you will need to configure babel with a ``babel.config.js`` file contai
 .. _rendermime:
 
 Mime Renderer Extensions
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 Mime Renderer extensions are a convenience for creating an extension
 that can render mime data and potentially render files of a given type.
@@ -428,7 +474,7 @@ calling ``.setData()`` with updated data for the rendered MIME type. The
 document can then be saved by the user in the usual manner.
 
 Themes
-~~~~~~
+------
 
 A theme is a JupyterLab extension that uses a ``ThemeManager`` and can
 be loaded and unloaded dynamically. The package must include all static
@@ -451,7 +497,7 @@ It is also possible to create a new theme using the
 `TypeScript theme cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`__.
 
 Standard (General-Purpose) Extensions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 
 JupyterLab's modular architecture is based around the idea
 that all extensions are on equal footing, and that they interact
@@ -587,7 +633,7 @@ In addition to the file system that is accessed by using the
 system that can be used to provide default setting values and user overrides.
 
 Extension Settings
-``````````````````
+""""""""""""""""""
 
 An extension can specify user settings using a JSON Schema. The schema
 definition should be in a file that resides in the ``schemaDir``
@@ -630,7 +676,7 @@ added in the application settings directory (by default this is the
   }
 
 State Database
-``````````````
+""""""""""""""
 
 The state database can be accessed by importing ``IStateDB`` from
 ``@jupyterlab/statedb`` and adding it to the list of ``requires`` for

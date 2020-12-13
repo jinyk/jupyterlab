@@ -65,6 +65,7 @@ export async function ensurePackage(
   const messages: string[] = [];
   const locals = options.locals || {};
   const cssImports = options.cssImports || [];
+  const cssModuleImports = options.cssModuleImports || [];
   const differentVersions = options.differentVersions || [];
 
   // Verify dependencies are consistent.
@@ -183,24 +184,53 @@ export async function ensurePackage(
   await Promise.all(promises);
 
   // Template the CSS index file.
-  if (cssImports && fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
+  if (
+    cssImports.length > 0 ||
+    fs.existsSync(path.join(pkgPath, 'style/base.css'))
+  ) {
     const funcName = 'ensurePackage';
-    let cssIndexContents = utils.fromTemplate(
-      HEADER_TEMPLATE,
-      { funcName },
-      { end: '' }
-    );
-    cssImports.forEach(cssImport => {
-      cssIndexContents += `\n@import url('~${cssImport}');`;
-    });
-    cssIndexContents += "\n\n@import url('./base.css');\n";
+    const cssIndexContents = [
+      utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
+      ...cssImports.map(x => `@import url('~${x}');`),
+      ''
+    ];
+    if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
+      cssIndexContents.push("@import url('./base.css');\n");
+    }
 
     // write out cssIndexContents, if needed
     const cssIndexPath = path.join(pkgPath, 'style/index.css');
     if (!fs.existsSync(cssIndexPath)) {
       fs.ensureFileSync(cssIndexPath);
     }
-    messages.push(...ensureFile(cssIndexPath, cssIndexContents, false));
+    messages.push(
+      ...ensureFile(cssIndexPath, cssIndexContents.join('\n'), false)
+    );
+  }
+
+  // Template the style module index file.
+  if (
+    cssModuleImports.length > 0 ||
+    fs.existsSync(path.join(pkgPath, 'style/base.css'))
+  ) {
+    const funcName = 'ensurePackage';
+    const jsIndexContents = [
+      utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
+      ...cssModuleImports.map(x => `import '${x}';`),
+      ''
+    ];
+    if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
+      jsIndexContents.push("import './base.css';\n");
+    }
+
+    // write out jsIndexContents, if needed
+    const jsIndexPath = path.join(pkgPath, 'style/index.js');
+    if (!fs.existsSync(jsIndexPath)) {
+      fs.ensureFileSync(jsIndexPath);
+    }
+    messages.push(
+      ...ensureFile(jsIndexPath, jsIndexContents.join('\n'), false)
+    );
   }
 
   // Look for unused packages
@@ -338,16 +368,42 @@ export async function ensurePackage(
 
   // Ensure that the `style` directories match what is in the `package.json`
   const styles = glob.sync(path.join(pkgPath, 'style', '**/*.*'));
-  for (const style of styles) {
-    if (!published.has(style)) {
-      messages.push(`Style file ${style} not published in ${pkgPath}`);
-    }
-  }
-
-  // If we have styles, ensure that 'style' field is declared
+  const styleIndex: { [key: string]: string } = {};
+  // If we have styles, ensure that 'style' and 'styleModule' fields are declared
   if (styles.length > 0) {
     if (data.style === undefined) {
       data.style = 'style/index.css';
+    }
+    styleIndex[path.join(pkgPath, data.style)] = data.style;
+    if (!fs.existsSync(path.join(pkgPath, data.style))) {
+      messages.push(
+        `Style file from .style package.json key (${data.style}) does not exist`
+      );
+    }
+
+    if (data.styleModule === undefined) {
+      data.styleModule = 'style/index.js';
+    }
+    styleIndex[path.join(pkgPath, data.styleModule)] = data.styleModule;
+    if (!fs.existsSync(path.join(pkgPath, data.styleModule))) {
+      messages.push(
+        `Style module file from .styleModule package.json key (${data.styleModule}) does not exist`
+      );
+    }
+  } else {
+    // Delete the style field
+    delete data.style;
+    delete data.styleModule;
+  }
+
+  for (const style of styles) {
+    if (!published.has(style)) {
+      // Automatically add the style index files
+      if (data.files !== undefined && styleIndex[style] !== undefined) {
+        data.files.push(styleIndex[style]);
+      } else {
+        messages.push(`Style file ${style} not published in ${pkgPath}`);
+      }
     }
   }
 
@@ -359,6 +415,28 @@ export async function ensurePackage(
       );
     } else if (data.sideEffects === false) {
       messages.push(`Style files not included in sideEffects in ${pkgPath}`);
+    } else if (data.sideEffects !== true) {
+      // Check to see if all .js and .css style files are listed in sideEffects
+      const sideEffects = new Set<string>(
+        data.sideEffects
+          ? data.sideEffects.reduce((acc: string[], curr: string) => {
+              return acc.concat(glob.sync(path.join(pkgPath, curr)));
+            }, [])
+          : []
+      );
+      for (const style of styles) {
+        let ext = path.extname(style);
+        if (['.js', '.css'].includes(ext) && !sideEffects.has(style)) {
+          // If it is the data.style or corresponding js file, just add it to sideEffects
+          if (styleIndex[style] !== undefined) {
+            data.sideEffects.push(styleIndex[style]);
+          } else {
+            messages.push(
+              `Style file ${style} not covered by sideEffects globs in ${pkgPath}`
+            );
+          }
+        }
+      }
     }
   }
 
@@ -539,6 +617,11 @@ export interface IEnsurePackageOptions {
    * The css import list for the package.
    */
   cssImports?: string[];
+
+  /**
+   * The css module import list for the package.
+   */
+  cssModuleImports?: string[];
 
   /**
    * Packages which are allowed to have multiple versions pulled in

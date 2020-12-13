@@ -48,6 +48,8 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/triple-slash-reference': 'warn',
     '@typescript-eslint/no-inferrable-types': 'off',
+    'jest/no-conditional-expect': 'warn',
+    'jest/valid-title': 'warn',
     'no-inner-declarations': 'off',
     'no-prototype-builtins': 'off',
     'no-control-regex': 'warn',
@@ -55,10 +57,6 @@ module.exports = {
     'no-case-declarations': 'warn',
     'no-useless-escape': 'off',
     'prefer-const': 'off',
-    'jest/no-jest-import': 'off',
-    'jest/no-export': 'warn',
-    'jest/no-try-expect': 'warn',
-    'jest/expect-expect': 'off',
     'react/prop-types': 'warn'
   },
   settings: {

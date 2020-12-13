@@ -36,8 +36,6 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
-import { jupyterIcon } from '@jupyterlab/ui-components';
-
 /**
  * A namespace for command IDs of semantic extension points.
  */
@@ -69,6 +67,8 @@ export namespace CommandIDs {
   export const openKernel = 'kernelmenu:open';
 
   export const interruptKernel = 'kernelmenu:interrupt';
+
+  export const reconnectToKernel = 'kernelmenu:reconnect-to-kernel';
 
   export const restartKernel = 'kernelmenu:restart';
 
@@ -136,16 +136,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     const menu = new MainMenu(commands);
     menu.id = 'jp-MainMenu';
-
-    const logo = new Widget();
-    jupyterIcon.element({
-      container: logo.node,
-      elementPosition: 'center',
-      margin: '2px 2px 2px 8px',
-      height: 'auto',
-      width: '16px'
-    });
-    logo.id = 'jp-MainLogo';
+    menu.addClass('jp-scrollbar-tiny');
 
     // Only add quit button if the back-end supports it by checking page config.
     const quitButton = PageConfig.getOption('quitButton').toLowerCase();
@@ -160,9 +151,13 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     createViewMenu(app, menu.viewMenu, trans);
     createHelpMenu(app, menu.helpMenu, trans);
 
+    // Set the Tabs Title so it's visible also in other shells
+    const tabsMenu = menu.tabsMenu;
+    tabsMenu.menu.title.label = trans.__('Tabs');
+
     // The tabs menu relies on lab shell functionality.
     if (labShell) {
-      createTabsMenu(app, menu.tabsMenu, labShell, trans);
+      createTabsMenu(app, tabsMenu, labShell, trans);
     }
 
     // Create commands to open the main application menus.
@@ -235,8 +230,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       });
     }
 
-    app.shell.add(logo, 'top');
-    app.shell.add(menu, 'top');
+    app.shell.add(menu, 'menu', { rank: 100 });
 
     return menu;
   }
@@ -524,6 +518,16 @@ export function createKernelMenu(
     execute: Private.delegateExecute(app, menu.kernelUsers, 'interruptKernel')
   });
 
+  commands.addCommand(CommandIDs.reconnectToKernel, {
+    label: trans.__('Reconnect to Kernel'),
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.kernelUsers,
+      'reconnectToKernel'
+    ),
+    execute: Private.delegateExecute(app, menu.kernelUsers, 'reconnectToKernel')
+  });
+
   commands.addCommand(CommandIDs.restartKernel, {
     label: trans.__('Restart Kernel…'),
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'restartKernel'),
@@ -603,6 +607,7 @@ export function createKernelMenu(
 
   menu.addGroup([{ command: CommandIDs.interruptKernel }], 0);
   menu.addGroup(restartGroup, 1);
+  menu.addGroup([{ command: CommandIDs.reconnectToKernel }], 1.5);
   menu.addGroup(
     [
       { command: CommandIDs.shutdownKernel },
@@ -807,7 +812,6 @@ export function createTabsMenu(
   trans: TranslationBundle
 ): void {
   const commands = app.commands;
-  menu.menu.title.label = trans.__('Tabs');
 
   // Add commands for cycling the active tabs.
   menu.addGroup(

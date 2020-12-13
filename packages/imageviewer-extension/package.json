@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/imageviewer-extension",
-  "version": "3.0.0-rc.1",
+  "version": "3.0.0-rc.13",
   "description": "JupyterLab - Image Widget Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -13,7 +13,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": [
-    "style/**/*.css"
+    "style/**/*.css",
+    "style/index.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -26,7 +27,8 @@
     "lib/*.js.map",
     "lib/*.js",
     "schema/*.json",
-    "style/**/*.css"
+    "style/**/*.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -36,11 +38,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-rc.1",
-    "@jupyterlab/apputils": "^3.0.0-rc.1",
-    "@jupyterlab/docregistry": "^3.0.0-rc.1",
-    "@jupyterlab/imageviewer": "^3.0.0-rc.1",
-    "@jupyterlab/translation": "^3.0.0-rc.1"
+    "@jupyterlab/application": "^3.0.0-rc.13",
+    "@jupyterlab/apputils": "^3.0.0-rc.13",
+    "@jupyterlab/docregistry": "^3.0.0-rc.13",
+    "@jupyterlab/imageviewer": "^3.0.0-rc.13",
+    "@jupyterlab/translation": "^3.0.0-rc.13"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
@@ -53,5 +55,6 @@
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"
-  }
+  },
+  "styleModule": "style/index.js"
 }

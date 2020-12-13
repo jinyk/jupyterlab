@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/running",
-  "version": "3.0.0-rc.1",
+  "version": "3.0.0-rc.13",
   "description": "JupyterLab - Running Sessions Panel",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -13,7 +13,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": [
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -25,7 +26,8 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -35,13 +37,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-rc.1",
-    "@jupyterlab/translation": "^3.0.0-rc.1",
-    "@jupyterlab/ui-components": "^3.0.0-rc.1",
+    "@jupyterlab/apputils": "^3.0.0-rc.13",
+    "@jupyterlab/translation": "^3.0.0-rc.13",
+    "@jupyterlab/ui-components": "^3.0.0-rc.13",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/disposable": "^1.4.3",
     "@lumino/signaling": "^1.4.3",
-    "react": "~16.13.1"
+    "react": "^17.0.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
@@ -50,5 +52,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "styleModule": "style/index.js"
 }

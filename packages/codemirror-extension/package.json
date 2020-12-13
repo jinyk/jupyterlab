@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror-extension",
-  "version": "3.0.0-rc.1",
+  "version": "3.0.0-rc.13",
   "description": "JupyterLab - CodeMirror Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -13,7 +13,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": [
-    "style/**/*.css"
+    "style/**/*.css",
+    "style/index.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -26,7 +27,8 @@
     "lib/*.js.map",
     "lib/*.js",
     "schema/*.json",
-    "style/**/*.css"
+    "style/**/*.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -36,16 +38,16 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-rc.1",
-    "@jupyterlab/codeeditor": "^3.0.0-rc.1",
-    "@jupyterlab/codemirror": "^3.0.0-rc.1",
-    "@jupyterlab/docregistry": "^3.0.0-rc.1",
-    "@jupyterlab/fileeditor": "^3.0.0-rc.1",
-    "@jupyterlab/mainmenu": "^3.0.0-rc.1",
-    "@jupyterlab/settingregistry": "^3.0.0-rc.1",
-    "@jupyterlab/statusbar": "^3.0.0-rc.1",
-    "@jupyterlab/translation": "^3.0.0-rc.1",
-    "@lumino/widgets": "^1.14.0",
+    "@jupyterlab/application": "^3.0.0-rc.13",
+    "@jupyterlab/codeeditor": "^3.0.0-rc.13",
+    "@jupyterlab/codemirror": "^3.0.0-rc.13",
+    "@jupyterlab/docregistry": "^3.0.0-rc.13",
+    "@jupyterlab/fileeditor": "^3.0.0-rc.13",
+    "@jupyterlab/mainmenu": "^3.0.0-rc.13",
+    "@jupyterlab/settingregistry": "^3.0.0-rc.13",
+    "@jupyterlab/statusbar": "^3.0.0-rc.13",
+    "@jupyterlab/translation": "^3.0.0-rc.13",
+    "@lumino/widgets": "^1.16.1",
     "codemirror": "~5.57.0"
   },
   "devDependencies": {
@@ -59,5 +61,6 @@
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"
-  }
+  },
+  "styleModule": "style/index.js"
 }

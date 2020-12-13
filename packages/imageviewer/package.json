@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/imageviewer",
-  "version": "3.0.0-rc.1",
+  "version": "3.0.0-rc.13",
   "description": "JupyterLab - Image Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -13,7 +13,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": [
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -25,7 +26,8 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -40,15 +42,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-rc.1",
-    "@jupyterlab/coreutils": "^5.0.0-rc.1",
-    "@jupyterlab/docregistry": "^3.0.0-rc.1",
+    "@jupyterlab/apputils": "^3.0.0-rc.13",
+    "@jupyterlab/coreutils": "^5.0.0-rc.13",
+    "@jupyterlab/docregistry": "^3.0.0-rc.13",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",
-    "@lumino/widgets": "^1.14.0"
+    "@lumino/widgets": "^1.16.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-rc.1",
+    "@jupyterlab/testutils": "^3.0.0-rc.13",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
@@ -58,5 +60,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "styleModule": "style/index.js"
 }

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc-extension",
-  "version": "5.0.0-rc.1",
+  "version": "5.0.0-rc.13",
   "description": "JupyterLab - Table of Contents widget extension",
   "keywords": [
     "jupyter",
@@ -18,14 +18,16 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": [
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "style": "style/index.css",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -35,15 +37,15 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-rc.1",
-    "@jupyterlab/docmanager": "^3.0.0-rc.1",
-    "@jupyterlab/fileeditor": "^3.0.0-rc.1",
-    "@jupyterlab/markdownviewer": "^3.0.0-rc.1",
-    "@jupyterlab/notebook": "^3.0.0-rc.1",
-    "@jupyterlab/rendermime": "^3.0.0-rc.1",
-    "@jupyterlab/toc": "^5.0.0-rc.1",
-    "@jupyterlab/translation": "^3.0.0-rc.1",
-    "@jupyterlab/ui-components": "^3.0.0-rc.1"
+    "@jupyterlab/application": "^3.0.0-rc.13",
+    "@jupyterlab/docmanager": "^3.0.0-rc.13",
+    "@jupyterlab/fileeditor": "^3.0.0-rc.13",
+    "@jupyterlab/markdownviewer": "^3.0.0-rc.13",
+    "@jupyterlab/notebook": "^3.0.0-rc.13",
+    "@jupyterlab/rendermime": "^3.0.0-rc.13",
+    "@jupyterlab/toc": "^5.0.0-rc.13",
+    "@jupyterlab/translation": "^3.0.0-rc.13",
+    "@jupyterlab/ui-components": "^3.0.0-rc.13"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
@@ -54,5 +56,6 @@
   },
   "jupyterlab": {
     "extension": true
-  }
+  },
+  "styleModule": "style/index.js"
 }

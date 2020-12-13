@@ -19,7 +19,8 @@ import {
   editorServices,
   EditorSyntaxStatus,
   CodeMirrorEditor,
-  Mode
+  Mode,
+  ICodeMirror
 } from '@jupyterlab/codemirror';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
@@ -47,6 +48,13 @@ namespace CommandIDs {
   export const goToLine = 'codemirror:go-to-line';
 }
 
+/** The CodeMirror singleton. */
+const codemirrorSingleton: JupyterFrontEndPlugin<ICodeMirror> = {
+  id: '@jupyterlab/codemirror-extension:codemirror',
+  provides: ICodeMirror,
+  activate: activateCodeMirror
+};
+
 /**
  * The editor services.
  */
@@ -61,7 +69,7 @@ const services: JupyterFrontEndPlugin<IEditorServices> = {
  */
 const commands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [IEditorTracker, ISettingRegistry, ITranslator],
+  requires: [IEditorTracker, ISettingRegistry, ITranslator, ICodeMirror],
   optional: [IMainMenu],
   activate: activateEditorCommands,
   autoStart: true
@@ -116,7 +124,8 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
-  editorSyntaxStatus
+  editorSyntaxStatus,
+  codemirrorSingleton
 ];
 export default plugins;
 
@@ -136,6 +145,29 @@ function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
 }
 
 /**
+ * Simplest implementation of the CodeMirror singleton provider.
+ */
+class CodeMirrorSingleton implements ICodeMirror {
+  get CodeMirror() {
+    return CodeMirror;
+  }
+
+  async ensureVimKeymap() {
+    if (!('Vim' in (CodeMirror as any))) {
+      // @ts-expect-error
+      await import('codemirror/keymap/vim.js');
+    }
+  }
+}
+
+/**
+ * Set up the CodeMirror singleton.
+ */
+function activateCodeMirror(app: JupyterFrontEnd): ICodeMirror {
+  return new CodeMirrorSingleton();
+}
+
+/**
  * Set up the editor widget menu and commands.
  */
 function activateEditorCommands(
@@ -143,6 +175,7 @@ function activateEditorCommands(
   tracker: IEditorTracker,
   settingRegistry: ISettingRegistry,
   translator: ITranslator,
+  codeMirror: ICodeMirror,
   mainMenu: IMainMenu | null
 ): void {
   const trans = translator.load('jupyterlab');
@@ -167,8 +200,7 @@ function activateEditorCommands(
 
     // Lazy loading of vim mode
     if (keyMap === 'vim') {
-      // @ts-expect-error
-      await import('codemirror/keymap/vim.js');
+      await codeMirror.ensureVimKeymap();
     }
 
     theme = (settings.get('theme').composite as string | null) || theme;
@@ -404,7 +436,7 @@ function activateEditorCommands(
     ['sublime', trans.__('sublime')],
     ['vim', trans.__('vim')],
     ['emacs', trans.__('emacs')]
-  ].forEach(([name, displayName])=> {
+  ].forEach(([name, displayName]) => {
     keyMapMenu.addItem({
       command: CommandIDs.changeKeyMap,
       args: { keyMap: name, displayName: displayName }

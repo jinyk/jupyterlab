@@ -24,8 +24,11 @@ jupyterlab/geckodriver
 jupyterlab/static
 jupyterlab/schemas
 jupyterlab/themes
-jupyterlab/imports.css
+jupyterlab/style.js
 jupyterlab/tests/**/static
+
+# Remove after next release
+jupyterlab/imports.css
 
 packages/nbconvert-css/style/
 packages/services/examples/node/config.json
@@ -51,6 +54,7 @@ storybook-static
 __pycache__
 *.egg-info
 .ipynb_checkpoints
+pip-wheel-metadata
 
 # xeus-python debug logs
 xpython_debug_logs

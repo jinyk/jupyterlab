@@ -40,8 +40,8 @@ function generateConfig({
     process.exit(1);
   }
 
-  let outputPath = data.jupyterlab['outputDir'];
-  outputPath = path.join(packagePath, outputPath);
+  const outputPath = path.join(packagePath, data.jupyterlab['outputDir']);
+  const staticPath = path.join(outputPath, 'static');
 
   // Handle the extension entry point and the lib entry point, if different
   const index = require.resolve(packagePath);
@@ -65,7 +65,15 @@ function generateConfig({
   }
 
   if (data.style) {
-    exposes['./style'] = path.join(packagePath, data.style);
+    let style = path.join(packagePath, data.style);
+    if (path.extname(style) === '.css') {
+      // See if there is a corresponding js file we can load instead
+      const jsFile = `${style.slice(0, style.length - 4)}.js`;
+      if (fs.existsSync(jsFile)) {
+        style = jsFile;
+      }
+    }
+    exposes['./style'] = style;
   }
 
   const coreData = require(path.join(corePath, 'package.json'));
@@ -153,7 +161,9 @@ function generateConfig({
   const extras = Build.ensureAssets({
     packageNames: [],
     packagePaths: [packagePath],
-    output: outputPath
+    output: staticPath,
+    schemaOutput: outputPath,
+    themeOutput: outputPath
   });
 
   fs.copyFileSync(
@@ -165,7 +175,7 @@ function generateConfig({
     apply(compiler: any) {
       compiler.hooks.done.tap('Cleanup', () => {
         // Find the remoteEntry file and add it to the package.json metadata
-        const files = glob.sync(path.join(outputPath, 'remoteEntry.*.js'));
+        const files = glob.sync(path.join(staticPath, 'remoteEntry.*.js'));
         let newestTime = -1;
         let newestRemote = '';
         files.forEach(fpath => {
@@ -177,7 +187,7 @@ function generateConfig({
         });
         const data = readJSONFile(path.join(outputPath, 'package.json'));
         const _build: any = {
-          load: path.basename(newestRemote)
+          load: path.join('static', path.basename(newestRemote))
         };
         if (exposes['./extension'] !== undefined) {
           _build.extension = './extension';
@@ -194,33 +204,49 @@ function generateConfig({
     }
   }
 
+  // Allow custom webpack config
+  let webpackConfigPath = data.jupyterlab['webpackConfig'];
+  let webpackConfig = {};
+
+  // Use the custom webpack config only if the path to the config
+  // is specified in package.json (opt-in)
+  if (webpackConfigPath) {
+    webpackConfigPath = path.join(packagePath, webpackConfigPath);
+    if (fs.existsSync(webpackConfigPath)) {
+      webpackConfig = require(webpackConfigPath);
+    }
+  }
   const config = [
-    merge(baseConfig, {
-      mode,
-      devtool,
-      entry: {},
-      output: {
-        filename: '[name].[contenthash].js',
-        path: outputPath,
-        publicPath: staticUrl || 'auto'
+    merge(
+      baseConfig,
+      {
+        mode,
+        devtool,
+        entry: {},
+        output: {
+          filename: '[name].[contenthash].js',
+          path: staticPath,
+          publicPath: staticUrl || 'auto'
+        },
+        module: {
+          rules: [{ test: /\.html$/, use: 'file-loader' }]
+        },
+        plugins: [
+          new ModuleFederationPlugin({
+            name: data.name,
+            library: {
+              type: 'var',
+              name: ['_JUPYTERLAB', data.name]
+            },
+            filename: 'remoteEntry.[contenthash].js',
+            exposes,
+            shared
+          }),
+          new CleanupPlugin()
+        ]
       },
-      module: {
-        rules: [{ test: /\.html$/, use: 'file-loader' }]
-      },
-      plugins: [
-        new ModuleFederationPlugin({
-          name: data.name,
-          library: {
-            type: 'var',
-            name: ['_JUPYTERLAB', data.name]
-          },
-          filename: 'remoteEntry.[contenthash].js',
-          exposes,
-          shared
-        }),
-        new CleanupPlugin()
-      ]
-    })
+      webpackConfig
+    )
   ].concat(extras);
 
   if (mode === 'development') {

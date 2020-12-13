@@ -8,6 +8,7 @@ import {
   circleIcon,
   classes,
   LabIcon,
+  offlineBoltIcon,
   refreshIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
@@ -764,6 +765,10 @@ namespace Private {
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
       this._onStatusChanged(sessionContext);
       sessionContext.statusChanged.connect(this._onStatusChanged, this);
+      sessionContext.connectionStatusChanged.connect(
+        this._onStatusChanged,
+        this
+      );
     }
 
     /**
@@ -776,39 +781,33 @@ namespace Private {
 
       const status = sessionContext.kernelDisplayStatus;
 
+      const circleIconProps: LabIcon.IProps = {
+        container: this.node,
+        title: this._trans.__('Kernel %1', Text.titleCase(status)),
+        stylesheet: 'toolbarButton',
+        alignSelf: 'normal',
+        height: '24px'
+      };
+
       // set the icon
-      if (this._isBusy(status)) {
-        circleIcon.element({
-          container: this.node,
-          title: this._trans.__('Kernel %1', Text.titleCase(status)),
-
-          stylesheet: 'toolbarButton',
-          alignSelf: 'normal',
-          height: '24px'
-        });
-      } else {
-        circleEmptyIcon.element({
-          container: this.node,
-          title: this._trans.__('Kernel %1', Text.titleCase(status)),
-
-          stylesheet: 'toolbarButton',
-          alignSelf: 'normal',
-          height: '24px'
-        });
-      }
-    }
-
-    /**
-     * Check if status should be shown as busy.
-     */
-    private _isBusy(status: ISessionContext.KernelDisplayStatus): boolean {
-      return (
+      LabIcon.remove(this.node);
+      if (
         status === 'busy' ||
         status === 'starting' ||
         status === 'terminating' ||
         status === 'restarting' ||
         status === 'initializing'
-      );
+      ) {
+        circleIcon.element(circleIconProps);
+      } else if (
+        status === 'connecting' ||
+        status === 'disconnected' ||
+        status === 'unknown'
+      ) {
+        offlineBoltIcon.element(circleIconProps);
+      } else {
+        circleEmptyIcon.element(circleIconProps);
+      }
     }
 
     protected translator: ITranslator;

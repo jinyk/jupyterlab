@@ -142,7 +142,9 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
 - Mehmet Bektas, Bloomberg (general development, extensions).
+- Alex Bozarth, IBM (general development, extensions).
 - Eric Charles, Datalayer, (general development, extensions).
+- Martha Cryan, IBM (general development, extensions).
 - Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
@@ -177,5 +179,5 @@ We have videoconference meetings every week where we discuss what we have been w
 Anyone is welcome to attend, if they would like to discuss a topic or just to listen in.
 
 - When: Wednesdays [9AM Pacific Time](https://www.thetimezoneconverter.com/?t=9%3A00%20am&tz=San%20Francisco&)
-- Where: [`jovyan` Zoom](https://zoom.us/my/jovyan)
+- Where: [`jovyan` Zoom](https://zoom.us/my/jovyan?pwd=c0JZTHlNdS9Sek9vdzR3aTJ4SzFTQT09)
 - What: [Meeting notes](https://hackmd.io/Y7fBMQPSQ1C08SDGI-fwtg?both)

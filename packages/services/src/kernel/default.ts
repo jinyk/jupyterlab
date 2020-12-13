@@ -440,6 +440,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._updateStatus('restarting');
     this._kernelSession = RESTARTING_KERNEL_SESSION;
     await restapi.restartKernel(this.id, this.serverSettings);
+    // Reconnect to the kernel to address cases where kernel ports
+    // have changed during the restart.
+    await this.reconnect();
   }
 
   /**
@@ -1216,6 +1219,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
       'channels?session_id=' + encodeURIComponent(this._clientId)
     );
 
+    // If token authentication is in use.
+    const token = settings.token;
+    if (settings.appendToken && token !== '') {
+      url = url + `&token=${encodeURIComponent(token)}`;
+    }
+
     this._ws = new settings.WebSocket(url);
 
     // Ensure incoming binary messages are not Blobs
@@ -1384,7 +1393,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         0,
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
-      console.error(
+      console.warn(
         `Connection lost, reconnecting in ${Math.floor(
           timeout / 1000
         )} seconds.`
